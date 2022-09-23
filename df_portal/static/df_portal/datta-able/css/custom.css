@@ -109,3 +109,7 @@ thead tr th input[type="checkbox"] {
 #sidebar-links li > a {
   font-size: 18px;
 }
+
+.pcoded-header .navbar-nav > li {
+    line-height: 30px;
+}

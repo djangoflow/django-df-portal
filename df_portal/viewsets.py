@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Type, Optional
 
+import django_tables2 as tables
+from crispy_forms.helper import FormHelper
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Model
@@ -9,11 +11,14 @@ from django.forms import ModelForm
 from django.urls import reverse, path
 from django.views.generic import CreateView, UpdateView, DetailView, DeleteView, RedirectView
 from django.views.generic.list import MultipleObjectMixin
+from django_filters.constants import ALL_FIELDS
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
 
+from df_portal.filters import BaseSearchFilterSet
 from df_portal.forms import BaseFilterFormHelper
 from df_portal.sites import PortalSite
+from df_portal.tables import ActionsColumn
 
 
 def view_meta(*, action: str, permission_verb: str, pk_in_url: bool = False):
@@ -86,15 +91,22 @@ class PortalBaseMixin(LoginRequiredMixin):
             f"portal/{self.site.theme}/{self.meta.action}.html",
         ]
 
+
 class PortalViewSet:
     model = None
     model_verbose_name = ""
     model_verbose_name_plural = ""
 
     table_class = None
-    form_helper_class = BaseFilterFormHelper
+    table_columns = []
+    table_attrs = {"class": "table table-hover"}
+    table_template_name = "django_tables2/bootstrap4.html"
+
     filterset_class = None
+    filterset_fields = []
+    filterset_search_fields = []
     paginate_by = 25
+    form_helper_class = BaseFilterFormHelper
 
     create_form_class = None
     update_form_class = None
@@ -120,6 +132,13 @@ class PortalViewSet:
                 fields = self.default_form_fields
                 widgets = self.default_form_widgets
 
+            def __init__(self, *args, **kwargs):
+                self.request = kwargs.pop("request", None)
+                super().__init__(*args, **kwargs)
+                self.helper = FormHelper(form=self)
+                self.helper.form_tag = False
+                self.helper.include_media = False
+
         return DynamicForm
 
     @property
@@ -144,11 +163,7 @@ class PortalViewSet:
             "model_verbose_name": self.get_model_verbose_name(),
             "model_verbose_name_plural": self.get_model_verbose_name_plural(),
 
-            "index_view_url": self.index_view.meta,
-            "index_view_permissiom": self.index_view.meta,
-            "update_view_meta": self.index_view.meta,
-            "create_view_meta": self.index_view.meta,
-            "delete_view_meta": self.index_view.meta,
+            "views": self.views,
         }
 
     @property
@@ -156,8 +171,8 @@ class PortalViewSet:
         info = ViewsetViewInfo()
 
         for view in self.view_methods:
-            setattr(info, f"{view.meta.action}_name", f"{self.site.name}:{self.index_view.meta.view_name(self.model)}")
-            setattr(info, f"{view.meta.action}_permission", self.index_view.meta.permission(self.model))
+            setattr(info, f"{view.meta.action}_name", f"{self.site.name}:{view.meta.view_name(self.model)}")
+            setattr(info, f"{view.meta.action}_permission", view.meta.permission(self.model))
 
         return info
 
@@ -194,8 +209,22 @@ class PortalViewSet:
 
             formhelper_class = self.form_helper_class
             paginate_by = self.paginate_by
-            filterset_class = self.filterset_class
             table_class = self.table_class
+
+            def get_filterset_class(self):
+                if self.filterset_class:
+                    return self.filterset_class
+
+                class DynamicFilter(BaseSearchFilterSet):
+                    search_fields = viewset.filterset_search_fields
+
+                    class Meta:
+                        model = viewset.model
+                        fields = viewset.filterset_fields
+                        if viewset.filterset_search_fields:
+                            fields.insert(0, "q")
+
+                return DynamicFilter
 
             def get_filterset(self, filterset_class):
                 kwargs = self.get_filterset_kwargs(filterset_class)
@@ -208,6 +237,21 @@ class PortalViewSet:
                     **super().get_context_data(**kwargs),
                     **viewset.additional_context(self.request),
                 }
+
+            def get_table_class(self):
+                if self.table_class:
+                    return self.table_class
+
+                class DynamicTable(tables.Table):
+                    actions = ActionsColumn()
+
+                    class Meta:
+                        model = viewset.model
+                        fields = viewset.table_columns
+                        attrs = viewset.table_attrs
+                        template_name = viewset.table_template_name
+
+                return DynamicTable
 
         return BaseListView
 
@@ -240,18 +284,11 @@ class PortalViewSet:
                     kwargs["initial"] = dict(self.request.GET)
                 return kwargs
 
-            # def get_success_url(self):
-            #     if self.request.user.has_perm(viewset.)
-            #
-            #     if "update" in cls.enabled_actions:
-            #         return (
-            #                 reverse(
-            #                     f"{cls.app_label}:{cls.model_name()}/update",
-            #                     args=[self.object.id],
-            #                 )
-            #                 + self.user_query_param()
-            #         )
-            #     return super().get_success_url()
+            def get_success_url(self):
+                if self.request.user.has_perm(viewset.views.update_permission):
+                    return reverse(viewset.views.update_name, args=[self.object.id])
+
+                return reverse(viewset.views.index_name)
 
         return BaseCreateView
 
@@ -283,14 +320,11 @@ class PortalViewSet:
                     "request": self.request,
                 }
 
-            # def get_success_url(self):
-            #     return (
-            #         reverse(
-            #             f"{self.site.name}:{self.meta.view_name(self.model)}",
-            #             args=[self.object.id],
-            #         )
-            #         + self.user_query_param()
-            #     )
+            def get_success_url(self):
+                return reverse(
+                    viewset.views.update_name,
+                    args=[self.object.id],
+                )
 
         return BaseUpdateView
 
@@ -316,7 +350,7 @@ class PortalViewSet:
         viewset = self
 
         class BaseDeleteView(PortalBaseMixin, DeleteView):
-            meta = self.index_view.meta
+            meta = self.delete_view.meta
             site = self.site
             model = self.model
 
@@ -325,6 +359,9 @@ class PortalViewSet:
                     **super().get_context_data(**kwargs),
                     **viewset.additional_context(self.request),
                 }
+
+            def get_success_url(self):
+                return reverse(viewset.views.index_name)
 
         return BaseDeleteView
 

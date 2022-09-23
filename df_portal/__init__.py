@@ -4,4 +4,4 @@ from df_portal.sites import site
 
 
 def autodiscover():
-    autodiscover_modules('portal.viewsets', register_to=site)
+    autodiscover_modules('portal', register_to=site)

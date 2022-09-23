@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth import authenticate, login, logout
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
 
@@ -16,7 +17,7 @@ class LoginForm(forms.Form):
     )
 
 
-def login_view(request):
+def login_view(request, site, **kwargs):
     form = LoginForm(request.POST or None)
 
     msg = None
@@ -29,7 +30,7 @@ def login_view(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect("portal:userprofile/index")
+                return redirect(site.views.home_name)
             else:
                 msg = "Invalid credentials"
         else:
@@ -38,6 +39,14 @@ def login_view(request):
     return render(request, "portal/datta-able/login.html", {"form": form, "msg": msg})
 
 
-def logout_view(request):
+def logout_view(request, site, **kwargs):
     logout(request)
-    return redirect("portal:login")
+    return redirect(site.views.login_name)
+
+
+def home_view(request, site):
+    for viewset in site._registry.values():
+        if request.user.has_perm(viewset.views.index_permission):
+            return redirect(viewset.views.index_name)
+
+    return HttpResponse("Please contact your administrator")

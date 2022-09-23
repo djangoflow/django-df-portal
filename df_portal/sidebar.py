@@ -51,7 +51,7 @@ class SidebarItemSettings:
                 item.is_active(request) for item in self.children
             ))
         else:
-            return self.viewset.model_meta.model_name in request.path
+            return f"/{self.viewset.model_meta.model_name}/" in request.path
 
     def build_item(self, request):
         return SidebarItem(
