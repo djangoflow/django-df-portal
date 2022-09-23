@@ -9,7 +9,6 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 ROOT_URLCONF = "tests.urls"
 SECRET_KEY = "111111"
 
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 INSTALLED_APPS = [
@@ -74,3 +73,7 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 ALLOWED_HOSTS = ['*']
+
+# Important!
+
+CRISPY_TEMPLATE_PACK = "bootstrap4"

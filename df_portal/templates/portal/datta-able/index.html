@@ -10,7 +10,7 @@
   <div class="card">
     <div class="card-body">
       {% if custom_action_labels %}
-        <form method="post" action="{% url custom_action_view_name %}?user={{ CURRENT_CLIENT.pk }}">
+        <form method="post" action="{% url custom_action_view_name %}">
           {% csrf_token %}
           {% render_table table %}
           <p>
@@ -28,6 +28,7 @@
 {% endblock %}
 
 {% block stylesheets %}
+  {{ block.super }}
   {{ filter.form.media.css }}
 {% endblock stylesheets %}
 
