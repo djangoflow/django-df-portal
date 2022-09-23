@@ -1,0 +1,111 @@
+table.table thead th.asc.orderable a::after {
+  font-family: 'feather';
+  content: " \e82d";
+}
+
+table.table thead th.desc.orderable a::after {
+  font-family: 'feather';
+  content: " \e82a";
+}
+
+.pcoded-content {
+  padding-top: 15px;
+}
+
+.btn-table-filter {
+  margin-right: 0;
+  margin-top: 29px;
+}
+
+
+.select2-selection__rendered {
+    line-height: 39px !important;
+}
+.select2-container .select2-selection--single {
+    height: 43px !important;
+}
+.select2-selection__arrow {
+    height: 42px !important;
+}
+
+thead tr th input[type="checkbox"] {
+  display: none !important;
+}
+
+.td-200 {
+  max-width: 200px;
+  white-space: normal !important;
+}
+
+.alert-error {
+    color: #994442;
+    border-color: #fccac7;
+    background-color: #f8d7da;
+}
+
+.img-logo {
+  height: 44px;
+  width: 44px;
+  opacity: 1 !important;
+  -webkit-transform: none !important;
+}
+
+
+.select-header {
+  height: calc(1.5rem + 9px);
+  padding: 0 20px;
+  background: #ffffff;
+  vertical-align: top;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem !important;
+    font-size: .875rem !important;
+    line-height: 1.5 !important;
+    border-radius: 0.2rem !important;
+}
+
+
+#filter-form .select2-selection__rendered {
+    line-height: 29px !important;
+}
+#filter-form .select2-container .select2-selection--single {
+    height: 33px !important;
+}
+#filter-form .select2-selection__arrow {
+    height: 32px !important;
+}
+
+.header-field-container {
+  width: 200px;
+}
+
+.whitespace-normal {
+  white-space: normal !important;
+}
+
+.admin-interface #nav-sidebar {
+  flex: 0 0 200px;
+}
+
+@media (min-width: 1280px) {
+  .admin-interface #main.shifted > #toggle-nav-sidebar {
+      left: 239px;
+  }
+
+  .admin-interface.change-list:not(.popup) #main.shifted > #nav-sidebar + .content, .admin-interface.change-form:not(.popup) #main.shifted > #nav-sidebar + .content {
+    max-width: calc(100% - 200px);
+  }
+}
+
+#sidebar-links ul {
+  padding-left: 16px;
+}
+
+#sidebar-links li {
+  padding: 5px;
+}
+
+#sidebar-links li > a {
+  font-size: 18px;
+}

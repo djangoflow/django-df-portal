@@ -1,0 +1,50 @@
+{% extends './layouts/base.html' %}
+{% load render_table from django_tables2 %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ model_verbose_name_plural.title }}{% endblock %}
+{% block header %}{{ model_verbose_name_plural.title }}{% endblock %}
+
+{% block content %}
+
+  <div class="card">
+    <div class="card-body">
+      {% if custom_action_labels %}
+        <form method="post" action="{% url custom_action_view_name %}?user={{ CURRENT_CLIENT.pk }}">
+          {% csrf_token %}
+          {% render_table table %}
+          <p>
+            {% for action, label in custom_action_labels.items %}
+              <button type="submit" name="action" value="{{ action }}" class="btn btn-primary">{{ label }}</button>
+            {% endfor %}
+          </p>
+        </form>
+      {% else %}
+        {% render_table table %}
+      {% endif %}
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block stylesheets %}
+  {{ filter.form.media.css }}
+{% endblock stylesheets %}
+
+
+{% block javascripts %}
+  {{ block.super }}
+  {{ filter.form.media.js }}
+  <script>
+    $("#filter-form select").change(function () {
+      $("#filter-form").submit();
+    });
+    $("#filter-form-search-clean").click(function () {
+       $("#filter-form [name=q]").val('');
+       $("#filter-form").submit();
+    });
+    $("#filter-form-search-submit").click(function (){
+      $("#filter-form").submit();
+    });
+  </script>
+{% endblock javascripts %}

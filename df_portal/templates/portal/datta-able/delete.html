@@ -1,0 +1,23 @@
+{% extends './layouts/base.html' %}
+{% load render_table from django_tables2 %}
+{% load crispy_forms_tags %}
+
+{% block title %}Delete {{ model_verbose_name }} {{ object }}{% endblock %}
+{% block header %}Delete {{ model_verbose_name }} {{ object }}{% endblock %}
+
+
+{% block content %}
+  <div class="card">
+    <div class="card-body">
+      <form method="post">{% csrf_token %}
+          <p>Are you sure you want to delete "{{ object }}"?</p>
+          {{ form }}
+          <input type="submit" value="Delete" class="btn btn-danger">
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block header_buttons %}
+    {% include './includes/back_button.html' %}
+{% endblock %}
