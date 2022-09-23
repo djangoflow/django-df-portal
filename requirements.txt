@@ -1,0 +1,6 @@
+django
+django-tables2
+django-select2
+django-filter
+django-crispy-forms
+Pillow

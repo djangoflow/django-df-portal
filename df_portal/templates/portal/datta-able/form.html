@@ -1,0 +1,30 @@
+{% extends './layouts/base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+  <div class="card">
+    <div class="card-body">
+      <form method="post" class="js-change-form" enctype="multipart/form-data">
+        {% crispy form %}
+        <div class="buttonHolder">
+          <input type="submit" value="{% block form_submit_text %}Submit{% endblock %}" class="btn btn-primary">
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block stylesheets %}
+  {{ form.media.css }}
+{% endblock stylesheets %}
+
+
+{% block javascripts %}
+   {{ block.super }}
+   {{ form.media.js }}
+{% endblock javascripts %}
+
+{% block header_buttons %}
+    {% include './includes/back_button.html' %}
+{% endblock %}

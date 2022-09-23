@@ -1,0 +1,52 @@
+{% load static %}
+
+<nav class="pcoded-navbar">
+  <div class="navbar-wrapper">
+    <div class="navbar-brand header-logo">
+      <a href="{% url sidebar.url %}" class="b-brand">
+        <div class="b-bg location-sale">
+          <img class="img-logo" src="{% static sidebar.image %}"/>
+        </div>
+
+        <span class="b-title">{{ sidebar.title }}</span>
+      </a>
+      <a class="mobile-menu" id="mobile-collapse" href="javascript:"><span></span></a>
+    </div>
+    <div class="navbar-content scroll-div">
+      <ul class="nav pcoded-inner-navbar">
+        {% for item in sidebar.items %}
+          {% if item.children %}
+            <li data-username="{{ item.title.title }}"
+                class="nav-item pcoded-hasmenu{% if item.is_active %} active pcoded-trigger{% endif %}"
+            >
+              <a href="javascript:" class="nav-link ">
+                <span class="pcoded-micon"><i class="feather icon-{{ item.icon }}"></i></span>
+                <span class="pcoded-mtext">{{ item.title.title }}</span>
+              </a>
+
+              <ul class="pcoded-submenu ">
+                {% for child in item.children %}
+                  <li class="{% if child.is_active %}active{% endif %}">
+                    <a href="{% url child.url %}" class="">{{ child.title.title }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </li>
+          {% else %}
+            <li
+              data-username="{{ item.title.title }}"
+              class="nav-item{% if item.is_active %} active{% endif %}"
+            >
+              <a href="{% url item.url %}" class="nav-link">
+                <span class="pcoded-micon">
+                  <i class="feather icon-{{ item.icon }}"></i>
+                </span>
+                <span class="pcoded-mtext">{{ item.title.title }}</span></a>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</nav>
+<!-- [ navigation menu ] end -->

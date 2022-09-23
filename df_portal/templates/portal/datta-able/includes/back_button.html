@@ -1,0 +1,3 @@
+<a class="btn btn-outline-primary float-right" href="{% if request.GET.back_to_url %}{{ request.GET.back_to_url }}{% else %}{% url index_view. %}{% endif %}">
+  <i class="feather icon-arrow-left"></i> Back
+</a>

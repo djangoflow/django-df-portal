@@ -1,0 +1,17 @@
+{#{% if detail_view_name and detail_permission and detail_permission in perms %}#}
+{#<a href="{% url detail_view_name pk=record.id %}">#}
+{#  <i class="feather icon-eye"></i>#}
+{#</a>#}
+{#{% endif %}#}
+{##}
+{#{% if update_view_name and update_permission and update_permission in perms %}#}
+{#<a href="{% url update_view_name pk=record.id %}">#}
+{#  <i class="feather icon-edit-1"></i>#}
+{#</a>#}
+{#{% endif %}#}
+{##}
+{#{% if delete_view_name and delete_permission and delete_permission in perms %}#}
+{#<a href="{% url delete_view_name pk=record.id %}">#}
+{#  <i class="feather icon-trash"></i>#}
+{#</a>#}
+{#{% endif %}#}

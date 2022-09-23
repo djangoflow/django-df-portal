@@ -1,0 +1,17 @@
+{% for field in filter.form %}
+  {% if field.name == 'q' %}
+    {% include './search_input.html' %}
+
+  {% elif field.name == 'user' %}
+    <div class="pl-4 pt-2">
+      Client:
+    </div>
+    <div class="pl-2 pt-1 header-field-container">
+      {{ field }}
+    </div>
+  {% else %}
+    <div class="pl-4 pt-1 header-field-container">
+      {{ field }}
+    </div>
+  {% endif %}
+{% endfor %}
