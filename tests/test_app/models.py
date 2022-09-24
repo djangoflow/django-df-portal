@@ -16,6 +16,9 @@ class Product(models.Model):
     image = models.ImageField(blank=True, null=True)
     tags = models.ManyToManyField(Tag, blank=True)
 
+    def __str__(self):
+        return self.title
+
 
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -24,6 +27,9 @@ class Order(models.Model):
     @property
     def total_amount(self):
         return sum([item.total_amount for item in self.orderitem_set.all()])
+
+    def __str__(self):
+        return f"{self.user.email} {self.created_at.date()}"
 
 
 class OrderItem(models.Model):
@@ -35,3 +41,6 @@ class OrderItem(models.Model):
     @property
     def total_amount(self):
         return self.count * self.price
+
+    def __str__(self):
+        return f"{self.product} x{self.count}"

@@ -1,24 +1,27 @@
-from dataclasses import dataclass
-from functools import cached_property
-from typing import Type, Optional
-
-import django_tables2 as tables
 from crispy_forms.helper import FormHelper
-from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Model
-from django.forms import ModelForm
-from django.urls import reverse, path
-from django.views.generic import CreateView, UpdateView, DetailView, DeleteView, RedirectView
-from django.views.generic.list import MultipleObjectMixin
-from django_filters.constants import ALL_FIELDS
-from django_filters.views import FilterView
-from django_tables2 import SingleTableMixin
-
+from dataclasses import dataclass
 from df_portal.filters import BaseSearchFilterSet
 from df_portal.forms import BaseFilterFormHelper
 from df_portal.sites import PortalSite
 from df_portal.tables import ActionsColumn
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Model
+from django.forms import ModelForm
+from django.urls import path
+from django.urls import reverse
+from django.views.generic import CreateView
+from django.views.generic import DeleteView
+from django.views.generic import DetailView
+from django.views.generic import RedirectView
+from django.views.generic import UpdateView
+from django.views.generic.list import MultipleObjectMixin
+from django_filters.views import FilterView
+from django_tables2 import SingleTableMixin
+from functools import cached_property
+from typing import Type
+
+import django_tables2 as tables
 
 
 def view_meta(*, action: str, permission_verb: str, pk_in_url: bool = False):
@@ -64,7 +67,9 @@ class ViewMeta:
         return f"{model._meta.model_name}/{self.action}"
 
     def permission(self, model):
-        return f"{model._meta.app_label}.{self.permission_verb}_{model._meta.model_name}"
+        return (
+            f"{model._meta.app_label}.{self.permission_verb}_{model._meta.model_name}"
+        )
 
 
 class PortalBaseMixin(LoginRequiredMixin):
@@ -111,7 +116,7 @@ class PortalViewSet:
     create_form_class = None
     update_form_class = None
     default_form_fields = "__all__"
-    default_form_widgets = {}
+    default_form_widgets = None
     form_prepopulate_from_params = True
 
     custom_actions = {}
@@ -158,11 +163,9 @@ class PortalViewSet:
         return {
             "site": self.site,
             "sidebar": self.site.sidebar(request),
-
             "model_meta": self.model_meta,
             "model_verbose_name": self.get_model_verbose_name(),
             "model_verbose_name_plural": self.get_model_verbose_name_plural(),
-
             "views": self.views,
         }
 
@@ -171,8 +174,14 @@ class PortalViewSet:
         info = ViewsetViewInfo()
 
         for view in self.view_methods:
-            setattr(info, f"{view.meta.action}_name", f"{self.site.name}:{view.meta.view_name(self.model)}")
-            setattr(info, f"{view.meta.action}_permission", view.meta.permission(self.model))
+            setattr(
+                info,
+                f"{view.meta.action}_name",
+                f"{self.site.name}:{view.meta.view_name(self.model)}",
+            )
+            setattr(
+                info, f"{view.meta.action}_permission", view.meta.permission(self.model)
+            )
 
         return info
 
@@ -180,7 +189,7 @@ class PortalViewSet:
     def view_methods(self):
         views = []
         for method_name in dir(self):
-            if method_name in ["view_methods", "views"] or method_name.startswith('__'):
+            if method_name in ["view_methods", "views"] or method_name.startswith("__"):
                 continue
             method = getattr(self, method_name)
             meta = getattr(method, "meta", None)
@@ -192,11 +201,14 @@ class PortalViewSet:
         return views
 
     def get_urls(self):
-        return [path(
-            view.meta.view_route(self.model),
-            view().as_view(),
-            name=view.meta.view_name(self.model),
-        ) for view in self.view_methods]
+        return [
+            path(
+                view.meta.view_route(self.model),
+                view().as_view(),
+                name=view.meta.view_name(self.model),
+            )
+            for view in self.view_methods
+        ]
 
     @view_meta(action="index", permission_verb="view")
     def index_view(self):
@@ -215,7 +227,7 @@ class PortalViewSet:
                 if self.filterset_class:
                     return self.filterset_class
 
-                class DynamicFilter(BaseSearchFilterSet):
+                class DynamicFilter(BaseSearchFilterSet(self.site)):
                     search_fields = viewset.filterset_search_fields
 
                     class Meta:
@@ -280,7 +292,10 @@ class PortalViewSet:
             def get_form_kwargs(self):
                 kwargs = super().get_form_kwargs()
                 kwargs["request"] = self.request
-                if self.request.method == "GET" and viewset.form_prepopulate_from_params:
+                if (
+                    self.request.method == "GET"
+                    and viewset.form_prepopulate_from_params
+                ):
                     kwargs["initial"] = dict(self.request.GET)
                 return kwargs
 

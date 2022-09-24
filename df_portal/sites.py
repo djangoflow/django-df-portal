@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-
-from django.urls import path
-
 from df_portal.sidebar import SidebarSettings
-from df_portal.views import login_view, logout_view, home_view
+from df_portal.views import home_view
+from df_portal.views import login_view
+from df_portal.views import logout_view
+from django.urls import path
 
 
 @dataclass
@@ -17,9 +17,17 @@ class PortalSite:
     brand_image = ""
     brand_url = ""
     brand_title = "Portal"
+
     name = "portal"
     theme = "datta-able"
     sidebar_items = []
+
+    search_label = "Search"
+    search_attrs = {
+        "class": "form-control",
+        "placeholder": "Search . . .",
+        "style": "width: 90px;",
+    }
 
     def __init__(self, **kwargs):
         self._registry = {}
@@ -27,7 +35,9 @@ class PortalSite:
             setattr(self, key, value)
 
     def register(self, viewset_class):
-        self._registry[viewset_class] = viewset_class(self, )
+        self._registry[viewset_class] = viewset_class(
+            self,
+        )
 
     def get_urls(self):
         kwargs = {"site": self}
@@ -39,9 +49,7 @@ class PortalSite:
         ]
 
         return urls + [
-            url
-            for viewset in self._registry.values()
-            for url in viewset.get_urls()
+            url for viewset in self._registry.values() for url in viewset.get_urls()
         ]
 
     @property
@@ -77,6 +85,7 @@ site = PortalSite()
 
 def register(viewset_class=None, *, portal_site=None):
     if portal_site:
+
         def wrapper(viewset_class_):
             portal_site.register(viewset_class_)
             return viewset_class_

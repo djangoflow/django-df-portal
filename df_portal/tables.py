@@ -11,4 +11,3 @@ class ActionsColumn(tables.TemplateColumn):
             }
         )
         super().__init__(**extra)
-
