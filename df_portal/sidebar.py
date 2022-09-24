@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import List, Type, Optional, Any
-
+from dataclasses import dataclass
+from dataclasses import field
 from django.http import HttpRequest
+from typing import Any
+from typing import List
+from typing import Optional
 
 
 @dataclass
@@ -29,9 +31,7 @@ class SidebarItemSettings:
 
     def has_permission(self, request):
         if self.children:
-            return any((
-                item.has_permission(request) for item in self.children
-            ))
+            return any((item.has_permission(request) for item in self.children))
         else:
             permission = self.permission or self.viewset.views.index_permission
             return request.user.has_perm(permission)
@@ -47,9 +47,7 @@ class SidebarItemSettings:
 
     def is_active(self, request: HttpRequest):
         if self.children:
-            return any((
-                item.is_active(request) for item in self.children
-            ))
+            return any((item.is_active(request) for item in self.children))
         else:
             return f"/{self.viewset.model_meta.model_name}/" in request.path
 
@@ -60,9 +58,10 @@ class SidebarItemSettings:
             is_active=self.is_active(request),
             url=self.get_url(),
             children=[
-                item.build_item(request) for item in self.children
+                item.build_item(request)
+                for item in self.children
                 if item.has_permission(request)
-            ]
+            ],
         )
 
 
@@ -87,7 +86,8 @@ class SidebarSettings:
             image=self.image,
             url=self.url,
             items=[
-                item.build_item(request) for item in self.items
+                item.build_item(request)
+                for item in self.items
                 if item.has_permission(request)
             ],
         )

@@ -1,7 +1,10 @@
 from django import forms
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate
+from django.contrib.auth import login
+from django.contrib.auth import logout
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
+from django.shortcuts import render
 
 
 class LoginForm(forms.Form):
@@ -36,7 +39,9 @@ def login_view(request, site, **kwargs):
         else:
             msg = "Error validating the form"
 
-    return render(request, "portal/datta-able/login.html", {"form": form, "msg": msg})
+    return render(
+        request, f"portal/{site.theme}/login.html", {"form": form, "msg": msg}
+    )
 
 
 def logout_view(request, site, **kwargs):
